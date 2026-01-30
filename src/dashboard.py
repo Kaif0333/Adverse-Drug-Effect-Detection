@@ -1,96 +1,79 @@
 import streamlit as st
-import pandas as pd
-import joblib
-from pathlib import Path
-import shap
-import matplotlib.pyplot as plt
+import pickle
+import numpy as np
 
-# -----------------------------------
-# Paths
-# -----------------------------------
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
-MODELS_DIR = BASE_DIR / "models"
-
-# -----------------------------------
-# Load data and models
-# -----------------------------------
-df = pd.read_csv(DATA_DIR / "clean_drug_data.csv")
-
-# Load Tfidf vectorizer
-tfidf_path = MODELS_DIR / "tfidf_vectorizer.pkl"
-rf_model_path = MODELS_DIR / "random_forest_model.pkl"
-
-tfidf = joblib.load(tfidf_path)
-rf_model = joblib.load(rf_model_path)
-
-# -----------------------------------
-# Streamlit Page Config
-# -----------------------------------
-st.set_page_config(page_title="Adverse Drug Effect Dashboard", layout="wide")
+# ---------------------------
+# Page Config
+# ---------------------------
+st.set_page_config(
+    page_title="Adverse Drug Effect Detection",
+    layout="wide"
+)
 
 st.title("💊 Adverse Drug Effect Detection & Safety Analytics")
-st.markdown("""
-Interactive dashboard to predict adverse effects from drug reviews.  
-Visualize which words contribute most to risk using SHAP explanations.
-""")
 
-# -----------------------------------
-# Sidebar Options
-# -----------------------------------
-st.sidebar.header("Options")
-option = st.sidebar.radio("Choose Option", ["Predict Review", "Top Risky Drugs"])
+# ---------------------------
+# Load Model & Vectorizer
+# ---------------------------
+@st.cache_resource
+def load_artifacts():
+    with open("models/random_forest_model.pkl", "rb") as f:
+        model = pickle.load(f)
+    with open("models/tfidf_vectorizer.pkl", "rb") as f:
+        vectorizer = pickle.load(f)
+    return model, vectorizer
 
-# -----------------------------------
-# Predict Review Section
-# -----------------------------------
-if option == "Predict Review":
-    st.subheader("Predict Probability of Adverse Effect")
-    review_input = st.text_area("Enter drug review text here")
-    
-    if st.button("Predict"):
-        if review_input.strip() == "":
-            st.warning("Please enter a review text!")
-        else:
-            # Clean input
-            review_clean = review_input.lower().strip()
-            X_vect = tfidf.transform([review_clean])
-            X_vect_dense = X_vect.toarray()  # Fix SHAP issue
+model, vectorizer = load_artifacts()
 
-            # Predict probability using Random Forest
-            prob = rf_model.predict_proba(X_vect_dense)[0][1]
-            st.success(f"Predicted probability of adverse effect: {prob*100:.2f}%")
+# ---------------------------
+# Sidebar Navigation
+# ---------------------------
+st.sidebar.header("Navigation")
+page = st.sidebar.radio(
+    "Go to",
+    ["Overview", "Predict Review"]
+)
 
-            # ---------------------------
-            # SHAP explanation
-            # ---------------------------
-            explainer = shap.TreeExplainer(rf_model)
-            shap_values = explainer.shap_values(X_vect_dense)
+# ---------------------------
+# Overview Page
+# ---------------------------
+if page == "Overview":
+    st.subheader("📊 Project Overview")
 
-            st.subheader("Top words influencing prediction")
-            fig, ax = plt.subplots()
-            shap.summary_plot(
-                shap_values,
-                features=X_vect_dense,
-                feature_names=tfidf.get_feature_names_out(),
-                show=False,
-                plot_type="bar",
-                max_display=10
-            )
-            st.pyplot(fig)
+    st.markdown("""
+    **Project Name:** Adverse Drug Effect Detection  
+    **Domain:** Data Analytics & Machine Learning  
 
-# -----------------------------------
-# Top Risky Drugs Section
-# -----------------------------------
-else:
-    st.subheader("Top N Drugs with Adverse Effects")
-    n = st.slider("Select number of top drugs", min_value=5, max_value=20, value=10)
-    
-    risky = df[df['label']==1]['drugName'].value_counts().head(n)
-    
-    st.bar_chart(risky)
-    
-    st.write("Data Table:")
-    st.dataframe(
-        risky.reset_index().rename(columns={'index':'Drug Name', 'drugName':'Adverse Count'})
+    ### What this system does:
+    - Takes a drug review as input
+    - Uses NLP + ML to detect adverse effects
+    - Helps in drug safety monitoring
+
+    ### Model Used:
+    - TF-IDF Vectorization
+    - Random Forest Classifier
+    """)
+
+# ---------------------------
+# Prediction Page
+# ---------------------------
+elif page == "Predict Review":
+    st.subheader("🧪 Predict Adverse Drug Effect")
+
+    review_text = st.text_area(
+        "Enter Drug Review:",
+        height=150,
+        placeholder="Type a patient drug review here..."
     )
+
+    if st.button("Predict"):
+        if review_text.strip() == "":
+            st.warning("⚠️ Please enter a review.")
+        else:
+            X_input = vectorizer.transform([review_text])
+            prediction = model.predict(X_input)[0]
+
+            if prediction == 1:
+                st.error("🚨 Adverse Drug Effect Detected")
+            else:
+                st.success("✅ No Adverse Drug Effect Detected")

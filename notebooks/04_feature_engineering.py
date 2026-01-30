@@ -1,78 +1,62 @@
 import pandas as pd
-from pathlib import Path
 import re
-
+from pathlib import Path
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
+from scipy.sparse import hstack
+import joblib
 
-# -----------------------------------
-# STEP 1: Paths
-# -----------------------------------
+# ===============================
+# PATH SETUP
+# ===============================
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 MODELS_DIR = BASE_DIR / "models"
 
-MODELS_DIR.mkdir(parents=True, exist_ok=True)
+MODELS_DIR.mkdir(exist_ok=True)
 
-# -----------------------------------
-# STEP 2: Load cleaned dataset
-# -----------------------------------
+# ===============================
+# LOAD CLEAN DATA
+# ===============================
 df = pd.read_csv(DATA_DIR / "clean_drug_data.csv")
 
-print("Dataset shape:", df.shape)
-
-# -----------------------------------
-# STEP 3: Basic text cleaning function
-# -----------------------------------
+# ===============================
+# TEXT CLEANING FUNCTION
+# ===============================
 def clean_text(text):
-    text = text.lower()
+    text = str(text).lower()
     text = re.sub(r"[^a-z\s]", "", text)
-    text = re.sub(r"\s+", " ", text)
-    return text.strip()
+    return text
 
 df["clean_review"] = df["review"].apply(clean_text)
 
-print("Sample cleaned review:")
-print(df["clean_review"].iloc[0])
-
-# -----------------------------------
-# STEP 4: Features and Target
-# -----------------------------------
-X = df["clean_review"]
-y = df["label"]
-
-# -----------------------------------
-# STEP 5: TF-IDF Vectorization
-# -----------------------------------
+# ===============================
+# FEATURE 1: TF-IDF
+# ===============================
 tfidf = TfidfVectorizer(
     max_features=5000,
     stop_words="english"
 )
 
-X_tfidf = tfidf.fit_transform(X)
+X_text = tfidf.fit_transform(df["clean_review"])
 
-print("TF-IDF feature shape:", X_tfidf.shape)
+# ===============================
+# FEATURE 2: REVIEW LENGTH
+# ===============================
+df["review_length"] = df["clean_review"].apply(lambda x: len(x.split()))
+X_length = df[["review_length"]].values
 
-# -----------------------------------
-# STEP 6: Train-test split
-# -----------------------------------
-X_train, X_test, y_train, y_test = train_test_split(
-    X_tfidf,
-    y,
-    test_size=0.2,
-    random_state=42,
-    stratify=y
-)
+# ===============================
+# COMBINE FEATURES
+# ===============================
+X = hstack([X_text, X_length])
+y = df["label"]
 
-print("Training samples:", X_train.shape[0])
-print("Testing samples:", X_test.shape[0])
-
-# -----------------------------------
-# STEP 7: Save processed data
-# -----------------------------------
-import joblib
-
+# ===============================
+# SAVE FEATURES & VECTORIZER
+# ===============================
+joblib.dump(X, MODELS_DIR / "processed_data.pkl")
+joblib.dump(y, MODELS_DIR / "labels.pkl")
 joblib.dump(tfidf, MODELS_DIR / "tfidf_vectorizer.pkl")
-joblib.dump((X_train, X_test, y_train, y_test), MODELS_DIR / "processed_data.pkl")
 
-print("Feature engineering completed and saved!")
+print("Feature engineering completed successfully")
+print("Feature shape:", X.shape)

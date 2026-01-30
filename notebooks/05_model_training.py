@@ -1,76 +1,103 @@
-import joblib
-from pathlib import Path
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-
-# -----------------------------------
-# STEP 1: Paths
-# -----------------------------------
-BASE_DIR = Path(__file__).resolve().parent.parent
-MODELS_DIR = BASE_DIR / "models"
-RESULTS_DIR = BASE_DIR / "results"
-RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-
-# -----------------------------------
-# STEP 2: Load processed data
-# -----------------------------------
-X_train, X_test, y_train, y_test = joblib.load(MODELS_DIR / "processed_data.pkl")
-
-# -----------------------------------
-# STEP 3: Logistic Regression
-# -----------------------------------
-print("Training Logistic Regression...")
-lr = LogisticRegression(max_iter=500)
-lr.fit(X_train, y_train)
-
-y_pred_lr = lr.predict(X_test)
-
-print("Logistic Regression Accuracy:", accuracy_score(y_test, y_pred_lr))
-print("Classification Report:\n", classification_report(y_test, y_pred_lr))
-
-# Save model
-joblib.dump(lr, MODELS_DIR / "logistic_regression_model.pkl")
-
-# -----------------------------------
-# STEP 4: Random Forest Classifier
-# -----------------------------------
-print("Training Random Forest Classifier...")
-rf = RandomForestClassifier(n_estimators=100, random_state=42)
-rf.fit(X_train, y_train)
-
-y_pred_rf = rf.predict(X_test)
-
-print("Random Forest Accuracy:", accuracy_score(y_test, y_pred_rf))
-print("Classification Report:\n", classification_report(y_test, y_pred_rf))
-
-# Save model
-joblib.dump(rf, MODELS_DIR / "random_forest_model.pkl")
-
-# -----------------------------------
-# STEP 5: Save confusion matrices
-# -----------------------------------
+import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
+import joblib
 
-# Logistic Regression Confusion Matrix
-cm_lr = confusion_matrix(y_test, y_pred_lr)
-plt.figure(figsize=(5,4))
-sns.heatmap(cm_lr, annot=True, fmt="d", cmap="Blues")
-plt.title("Logistic Regression Confusion Matrix")
-plt.xlabel("Predicted")
-plt.ylabel("Actual")
-plt.savefig(RESULTS_DIR / "confusion_matrix_lr.png")
-plt.close()
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import TfidfVectorizer
 
-# Random Forest Confusion Matrix
-cm_rf = confusion_matrix(y_test, y_pred_rf)
-plt.figure(figsize=(5,4))
-sns.heatmap(cm_rf, annot=True, fmt="d", cmap="Greens")
-plt.title("Random Forest Confusion Matrix")
-plt.xlabel("Predicted")
-plt.ylabel("Actual")
-plt.savefig(RESULTS_DIR / "confusion_matrix_rf.png")
-plt.close()
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.ensemble import RandomForestClassifier
 
-print("Model training completed. Models and results saved!")
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    confusion_matrix,
+    ConfusionMatrixDisplay,
+    RocCurveDisplay
+)
+
+# ----------------------------
+# Load clean data
+# ----------------------------
+df = pd.read_csv("data/clean_drug_data.csv")
+
+X = df["review"]
+y = df["label"]
+
+# ----------------------------
+# Stratified Split
+# ----------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+# ----------------------------
+# Models
+# ----------------------------
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=1000),
+    "Naive Bayes": MultinomialNB(),
+    "Random Forest": RandomForestClassifier(
+        n_estimators=100,
+        random_state=42
+    )
+}
+
+results = {}
+
+# ----------------------------
+# Train & Evaluate
+# ----------------------------
+for name, model in models.items():
+    print(f"\n===== {name} =====")
+
+    pipeline = Pipeline([
+        ("tfidf", TfidfVectorizer(
+            max_features=5000,
+            stop_words="english"
+        )),
+        ("model", model)
+    ])
+
+    pipeline.fit(X_train, y_train)
+
+    y_pred = pipeline.predict(X_test)
+    y_prob = pipeline.predict_proba(X_test)[:, 1]
+
+    results[name] = {
+        "Accuracy": accuracy_score(y_test, y_pred),
+        "Precision": precision_score(y_test, y_pred),
+        "Recall": recall_score(y_test, y_pred),
+        "F1": f1_score(y_test, y_pred),
+        "ROC_AUC": roc_auc_score(y_test, y_prob)
+    }
+
+    # Confusion Matrix
+    ConfusionMatrixDisplay.from_predictions(y_test, y_pred)
+    plt.title(f"{name} - Confusion Matrix")
+    plt.show()
+
+    # ROC Curve
+    RocCurveDisplay.from_predictions(y_test, y_prob)
+    plt.title(f"{name} - ROC Curve")
+    plt.show()
+
+    # Save model
+    joblib.dump(pipeline, f"models/{name.replace(' ', '_').lower()}_pipeline.pkl")
+
+# ----------------------------
+# Summary
+# ----------------------------
+print("\n📊 MODEL COMPARISON")
+for model, metrics in results.items():
+    print(model, metrics)
