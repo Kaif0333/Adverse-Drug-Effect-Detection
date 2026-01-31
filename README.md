@@ -282,11 +282,14 @@ Improve accuracy using class balancing
 Add model explainability (SHAP)
 
 Deploy on cloud platform
+## 🎥 Project Demo
+▶️ Screen Recording:  
+https://drive.google.com/file/d/10uDarsyf8AddMCxoA0QDjtwyfUt0Z9Df/view
+
 
 👨‍🎓 Academic Use
 
 This project is developed as part of B.Tech Final Year Project.
-📬 Author
 
 S. Mohammed Kaif Basha
 B.Tech – Computer Science ( AI & ML )
