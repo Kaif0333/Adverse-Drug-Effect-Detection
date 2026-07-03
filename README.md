@@ -1,295 +1,183 @@
-<<<<<<< HEAD
 # Adverse Drug Effect Detection & Safety Analytics
 
-## 📌 Project Overview
-This project focuses on detecting **adverse drug effects** from patient reviews using **Data Analytics, NLP, and Machine Learning**.  
-It helps identify negative drug reactions early to support healthcare safety decisions.
+A machine learning and NLP project that analyzes drug reviews to identify possible adverse drug effects from patient-written text. The project combines data cleaning, exploratory analysis, TF-IDF feature extraction, model training, and a Streamlit dashboard for real-time prediction.
 
 ---
 
-## 🎯 Objectives
+## Project Overview
+
+Adverse Drug Effect Detection & Safety Analytics focuses on detecting negative drug reactions from patient reviews using **Data Analytics, Natural Language Processing, and Machine Learning**.
+
+The goal is to support healthcare analytics by identifying review patterns that may indicate adverse drug reactions.
+
+---
+
+## Objectives
+
 - Analyze drug review data
-- Detect adverse drug reactions from text
-- Perform exploratory data analysis (EDA)
-- Build and evaluate machine learning models
-- Deploy a simple interactive dashboard
+- Clean and preprocess text-based medical review data
+- Perform exploratory data analysis on drug ratings and review patterns
+- Train a machine learning model for adverse-effect classification
+- Build an interactive Streamlit dashboard for real-time prediction
 
 ---
 
-## 🧠 Domain
+## Domain
+
 - Data Analytics
 - Machine Learning
-- Natural Language Processing (NLP)
+- Natural Language Processing
+- Healthcare Safety Analytics
 
 ---
 
-## 🗂 Project Structure
+## Tech Stack
+
+| Area | Tools |
+|---|---|
+| Programming | Python |
+| Data Processing | Pandas, NumPy |
+| NLP | TF-IDF Vectorization |
+| Machine Learning | scikit-learn, Random Forest Classifier |
+| Dashboard | Streamlit |
+| Visualization | Matplotlib / EDA notebooks |
+
+---
+
+## Project Structure
+
+```text
 Adverse_Drug_Effect_Project/
-
-
-│── data/
-
-│ ├── raw_drug_data.csv
-
-│ ├── clean_drug_data.csv
-
 │
-
-│── notebooks/
-
-│ ├── 01_data_loading.ipynb
-
-│ ├── 02_data_cleaning.ipynb
-
-│ ├── 03_eda.ipynb
-
-│ ├── 04_model_training.ipynb
-
+├── data/
+│   ├── raw_drug_data.csv
+│   └── clean_drug_data.csv
 │
-
-│── src/
-
-│ ├── preprocess.py
-
-│ ├── train_model.py
-
-│ ├── predict.py
-
+├── notebooks/
+│   ├── 01_data_loading.ipynb
+│   ├── 02_data_cleaning.ipynb
+│   ├── 03_eda.ipynb
+│   └── 04_model_training.ipynb
 │
-
-│── models/
-
-│ ├── adverse_model.pkl
-
-│ ├── tfidf_vectorizer.pkl
-
+├── src/
+│   ├── preprocess.py
+│   ├── train_model.py
+│   └── predict.py
 │
-
-│── app.py
-
-│── requirements.txt
-
-│── README.md
+├── models/
+│   ├── adverse_model.pkl
+│   └── tfidf_vectorizer.pkl
+│
+├── app.py
+├── requirements.txt
+└── README.md
+```
 
 ---
 
-## 📊 Dataset
-- Source: Drug review dataset
-- Features:
-  - drugName
-  - condition
-  - review
-  - rating
-  - label (0 = No Adverse Effect, 1 = Adverse Effect)
+## Dataset
+
+The project uses a drug review dataset with fields such as:
+
+- `drugName`
+- `condition`
+- `review`
+- `rating`
+- `label` where `0 = No Adverse Effect` and `1 = Adverse Effect`
 
 ---
 
-## 🧹 Data Processing
-- Missing values handled
-- Text cleaned and normalized
-- Data types corrected
-- Clean dataset saved separately
+## Data Processing
+
+- Handled missing values
+- Cleaned and normalized review text
+- Corrected data types
+- Prepared clean datasets for model training
+- Converted text reviews into numerical features using TF-IDF
 
 ---
 
-## 📈 Exploratory Data Analysis (EDA)
+## Exploratory Data Analysis
+
+The EDA phase includes:
+
 - Distribution of adverse vs non-adverse reviews
-- Rating vs adverse effect analysis
+- Rating patterns across drug reviews
 - Review length comparison
-- Statistical insights documented
+- Basic statistical insights for healthcare safety analysis
 
 ---
 
-## 🤖 Machine Learning
-- TF-IDF for text feature extraction
-- Random Forest Classifier
-- Model evaluation and saving
+## Machine Learning Approach
+
+The model pipeline uses:
+
+1. Text cleaning and preprocessing
+2. TF-IDF vectorization
+3. Random Forest classification
+4. Model evaluation
+5. Saved model and vectorizer for dashboard prediction
 
 ---
 
-## 🖥 Dashboard
-- Built using **Streamlit**
-- User enters a drug review
-- Model predicts adverse effect in real-time
+## Streamlit Dashboard
 
----
+The dashboard allows users to enter a drug review and receive a real-time prediction indicating whether the review may contain an adverse drug effect signal.
 
-## 🚀 How to Run the Project
-
-### 1️⃣ Install dependencies
 ```bash
-pip install -r requirements.txt
 streamlit run app.py
 ```
-✅ Results
-
-Successfully detects adverse drug reactions
-
-Provides analytical insights into drug safety
-
-Can assist healthcare analytics systems
-
-📌 Future Enhancements
-
-Improve accuracy using class balancing
-
-Add model explainability (SHAP)
-
-Deploy on cloud platform
-
-👨‍🎓 Academic Use
-
-This project is developed as part of B.Tech Final Year Project.
-📬 Author
-
-S. Mohammed Kaif Basha
-B.Tech – Computer Science ( AI & ML )
-=======
-# Adverse Drug Effect Detection & Safety Analytics
-
-## 📌 Project Overview
-This project focuses on detecting **adverse drug effects** from patient reviews using **Data Analytics, NLP, and Machine Learning**.  
-It helps identify negative drug reactions early to support healthcare safety decisions.
 
 ---
 
-## 🎯 Objectives
-- Analyze drug review data
-- Detect adverse drug reactions from text
-- Perform exploratory data analysis (EDA)
-- Build and evaluate machine learning models
-- Deploy a simple interactive dashboard
+## How to Run
 
----
+### 1. Clone the repository
 
-## 🧠 Domain
-- Data Analytics
-- Machine Learning
-- Natural Language Processing (NLP)
+```bash
+git clone https://github.com/Kaif0333/Adverse-Drug-Effect-Detection.git
+cd Adverse-Drug-Effect-Detection
+```
 
----
+### 2. Install dependencies
 
-## 🗂 Project Structure
-Adverse_Drug_Effect_Project/
-
-
-│── data/
-
-│ ├── raw_drug_data.csv
-
-│ ├── clean_drug_data.csv
-
-│
-
-│── notebooks/
-
-│ ├── 01_data_loading.ipynb
-
-│ ├── 02_data_cleaning.ipynb
-
-│ ├── 03_eda.ipynb
-
-│ ├── 04_model_training.ipynb
-
-│
-
-│── src/
-
-│ ├── preprocess.py
-
-│ ├── train_model.py
-
-│ ├── predict.py
-
-│
-
-│── models/
-
-│ ├── adverse_model.pkl
-
-│ ├── tfidf_vectorizer.pkl
-
-│
-
-│── app.py
-
-│── requirements.txt
-
-│── README.md
-
----
-
-## 📊 Dataset
-- Source: Drug review dataset
-- Features:
-  - drugName
-  - condition
-  - review
-  - rating
-  - label (0 = No Adverse Effect, 1 = Adverse Effect)
-
----
-
-## 🧹 Data Processing
-- Missing values handled
-- Text cleaned and normalized
-- Data types corrected
-- Clean dataset saved separately
-
----
-
-## 📈 Exploratory Data Analysis (EDA)
-- Distribution of adverse vs non-adverse reviews
-- Rating vs adverse effect analysis
-- Review length comparison
-- Statistical insights documented
-
----
-
-## 🤖 Machine Learning
-- TF-IDF for text feature extraction
-- Random Forest Classifier
-- Model evaluation and saving
-
----
-
-## 🖥 Dashboard
-- Built using **Streamlit**
-- User enters a drug review
-- Model predicts adverse effect in real-time
-
----
-
-## 🚀 How to Run the Project
-
-### 1️⃣ Install dependencies
 ```bash
 pip install -r requirements.txt
+```
+
+### 3. Run the application
+
+```bash
 streamlit run app.py
 ```
-✅ Results
 
-Successfully detects adverse drug reactions
+---
 
-Provides analytical insights into drug safety
+## Results
 
-Can assist healthcare analytics systems
+- Detects possible adverse drug reactions from review text
+- Provides analytical insights into drug safety reviews
+- Demonstrates end-to-end ML workflow from data cleaning to deployment-ready dashboard
 
-📌 Future Enhancements
+---
 
-Improve accuracy using class balancing
+## Project Demo
 
-Add model explainability (SHAP)
-
-Deploy on cloud platform
-## 🎥 Project Demo
 ▶️ Screen Recording:  
 https://drive.google.com/file/d/10uDarsyf8AddMCxoA0QDjtwyfUt0Z9Df/view
 
+---
 
-👨‍🎓 Academic Use
+## Future Enhancements
 
-This project is developed as part of B.Tech Final Year Project.
+- Improve model performance using class balancing
+- Add model explainability using SHAP
+- Deploy the Streamlit dashboard online
+- Add more advanced transformer-based NLP models
 
-S. Mohammed Kaif Basha
-B.Tech – Computer Science ( AI & ML )
+---
+
+## Author
+
+**S. Mohammed Kaif Basha**  
+B.Tech – Computer Science & Engineering (AI & ML)
